@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   BarChart3,
   FileText,
@@ -12,11 +12,13 @@ import {
   Eye,
   Shield,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  LogOut
 } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/hooks/useAuth";
 
 const sidebarItems = [
   { title: "Dashboard", url: "/admin", icon: BarChart3 },
@@ -35,6 +37,13 @@ const sidebarItems = [
 export const AdminSidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { profile, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   const isActive = (path: string) => {
     if (path === "/admin") {
@@ -120,15 +129,25 @@ export const AdminSidebar = () => {
       <div className="p-4 border-t">
         <div className={`flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
           <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-medium">
-            A
+            {profile?.name?.charAt(0) || 'A'}
           </div>
           {!collapsed && (
             <div className="flex-1">
-              <p className="font-medium text-sm">Admin</p>
-              <p className="text-xs text-muted-foreground">admin@asasports.com</p>
+              <p className="font-medium text-sm">{profile?.name || 'Admin'}</p>
+              <p className="text-xs text-muted-foreground capitalize">{profile?.role || 'admin'}</p>
             </div>
           )}
         </div>
+        {!collapsed && (
+          <Button
+            variant="ghost"
+            onClick={handleSignOut}
+            className="flex items-center gap-2 px-0 py-2 mt-2 text-sm text-muted-foreground hover:text-foreground w-full justify-start"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        )}
       </div>
     </div>
   );
